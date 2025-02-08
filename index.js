@@ -10,8 +10,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const usersRouter = require('./routes/user');
+const shipmentRouter = require('./routes/shipment');
 
 app.use('/api/users', usersRouter);
+app.use('/api/shipment', shipmentRouter);
 
 app.get("/ruta-prueba", (req, res) => {
     return res.status(200).json(
