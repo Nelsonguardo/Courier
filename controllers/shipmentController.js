@@ -47,6 +47,10 @@ const updateShipmentStatus = async (req, res) => {
         // Actualizar el estado del envío y registrar en el historial
         const result = await ShipmentModel.updateShipmentStatus(shipment_id, new_status, observation);
 
+        if (!result) {
+            return res.status(404).json({ error: "Envío no encontrado" });
+        }
+
         res.status(200).json({ message: "Estado del envío actualizado correctamente", result });
     } catch (error) {
         console.error("Error actualizando el estado del envío:", error);
@@ -54,7 +58,7 @@ const updateShipmentStatus = async (req, res) => {
     }
 };
 
-const TrackShipmentStatus = async (req, res) => {
+const getOneTrackShipmentStatusById = async (req, res) => {
     try {
         const { shipment_id } = req.body;
 
@@ -64,7 +68,34 @@ const TrackShipmentStatus = async (req, res) => {
         }
 
         // Obtener el historial de estados del envío
-        const result = await ShipmentModel.getTrackShipmentStatusById(shipment_id);
+        const result = await ShipmentModel.getOneTrackShipmentStatusById(shipment_id);
+
+        if (result.length === 0) {
+            return res.status(404).json({ error: "Historial de estados del envío no encontrado" });
+        }
+
+        res.status(200).json({ message: "Historial de estados del envío obtenido correctamente", result });
+    } catch (error) {
+        console.error("Error obteniendo el historial de estados del envío:", error);
+        res.status(500).json({ error: "Error obteniendo el historial de estados del envío" });
+    }
+};
+
+const getAllTrackShipmentStatusById = async (req, res) => {
+    try {
+        const { shipment_id } = req.body;
+
+        // Validar datos
+        if (!shipment_id) {
+            return res.status(400).json({ error: "Faltan datos por enviar" });
+        }
+
+        // Obtener el historial de estados del envío
+        const result = await ShipmentModel.getAllTrackShipmentStatusById(shipment_id);
+
+        if (result.length === 0) {
+            return res.status(404).json({ error: "Historial de estados del envío no encontrado" });
+        }
 
         res.status(200).json({ message: "Historial de estados del envío obtenido correctamente", result });
     } catch (error) {
@@ -77,5 +108,6 @@ const TrackShipmentStatus = async (req, res) => {
 module.exports = {
     createShipment,
     updateShipmentStatus,
-    TrackShipmentStatus
+    getOneTrackShipmentStatusById,
+    getAllTrackShipmentStatusById
 };

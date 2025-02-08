@@ -43,6 +43,16 @@ const createShipmentStatus = async (shipment_id) => {
 // Actualizar el estado del envío
 const updateShipmentStatus = async (shipment_id, new_status, observation) => {
     const connection = await createConnection();
+
+    const findShipment = await connection.execute(
+        "SELECT * FROM shipments WHERE id = ?", [shipment_id]
+    );
+
+    if (findShipment[0].length === 0) {
+        await connection.end();
+        return null;
+    }
+    // Actualizar el estado del envío
     await connection.execute(
         "UPDATE shipments SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
         [new_status, shipment_id]
@@ -58,8 +68,19 @@ const updateShipmentStatus = async (shipment_id, new_status, observation) => {
     return result;
 };
 
+// Obtener el estado actual de un envío
+const getOneTrackShipmentStatusById = async (shipment_id) => {
+    const connection = await createConnection();
+    const [rows] = await connection.execute(
+        "SELECT * FROM shipment_status_history WHERE shipment_id = ? ORDER BY changed_at DESC LIMIT 1",
+        [shipment_id]
+    );
+    await connection.end();
+    return rows;
+};
+
 // Obtener el historial de estados del envío por ID
-const getTrackShipmentStatusById = async (shipment_id) => {
+const getAllTrackShipmentStatusById = async (shipment_id) => {
     const connection = await createConnection();
     const [rows] = await connection.execute(
         "SELECT * FROM shipment_status_history WHERE shipment_id = ? ORDER BY changed_at DESC",
@@ -73,5 +94,6 @@ module.exports = {
     createShipment,
     createShipmentStatus,
     updateShipmentStatus,
-    getTrackShipmentStatusById
+    getOneTrackShipmentStatusById,
+    getAllTrackShipmentStatusById
 };
