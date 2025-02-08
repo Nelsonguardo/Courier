@@ -1,20 +1,19 @@
-const createConnection = require('../dataBase/db');
-const jwt = require('../services/jwt');
 const bcrypt = require('bcrypt');
-// const validate = require('../helpers/validate');
+const jwt = require('../services/jwt');
+const UserModel = require('../models/userModel');
 
+// Verificar si un usuario ya existe por su email
 const UserList = async (req, res) => {
     try {
-        const connection = await createConnection(); // Crear nueva conexión
-        const [rows] = await connection.execute("SELECT * FROM users");
-        await connection.end(); // Cerrar conexión
-        res.status(200).json(rows);
+        const users = await UserModel.getAllUsers();
+        res.status(200).json(users);
     } catch (error) {
         console.error("Error en UserList:", error);
         res.status(500).json({ error: "Error obteniendo usuarios" });
     }
 };
 
+// Controlador para crear un nuevo usuario
 const UserCreate = async (req, res) => {
     try {
         const { name, last_name, email, password } = req.body;
@@ -24,29 +23,16 @@ const UserCreate = async (req, res) => {
             return res.status(400).json({ error: "Faltan datos por enviar" });
         }
 
-        const connection = await createConnection();
-
         // Verificar si el usuario ya existe
-        const [existingUser] = await connection.execute(
-            "SELECT id FROM users WHERE email = ?",
-            [email.toLowerCase()]
-        );
-
-        if (existingUser.length > 0) {
-            await connection.end();
+        if (await UserModel.userExists(email)) {
             return res.status(409).json({ error: "El usuario ya existe" }); // 409 Conflict
         }
 
         // Encriptar la contraseña
-        const pwd = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         // Crear el usuario
-        const [results] = await connection.execute(
-            "INSERT INTO users (name, last_name, email, password) VALUES (?,?,?,?)",
-            [name, last_name, email.toLowerCase(), pwd]
-        );
-
-        await connection.end();
+        const results = await UserModel.createUser(name, last_name, email, hashedPassword);
 
         res.status(201).json({ message: "Usuario creado exitosamente", results });
     } catch (error) {
@@ -55,9 +41,12 @@ const UserCreate = async (req, res) => {
     }
 };
 
+// Controlador para el login de usuarios
 const login = async (req, res) => {
     try {
         let { email, password } = req.body;
+
+        // Validar datos
         if (!email || !password) {
             return res.status(400).send({
                 status: "error",
@@ -65,19 +54,16 @@ const login = async (req, res) => {
             });
         }
 
-        // Conectar a la base de datos
-        const connection = await createConnection();
-        const [rows] = await connection.execute("SELECT * FROM users WHERE email = ?", [email]);
-        await connection.end();
+        // Obtener el usuario por email
+        const user = await UserModel.getUserByEmail(email);
 
-        if (rows.length === 0) {
+        // Verificar si el usuario existe
+        if (!user) {
             return res.status(404).send({
                 status: "error",
                 message: "El usuario no existe"
             });
         }
-
-        const user = rows[0];
 
         // Comparar la contraseña con bcrypt
         const isValidPassword = await bcrypt.compare(password, user.password);
@@ -88,7 +74,7 @@ const login = async (req, res) => {
             });
         }
 
-        // Generar el token (descomenta cuando tengas `jwt`)
+        // Generar el token
         const token = jwt.createToken(user);
 
         return res.status(200).send({
