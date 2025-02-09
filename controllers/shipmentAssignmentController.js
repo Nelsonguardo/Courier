@@ -43,7 +43,7 @@ const createShipmentAssignment =  async (req, res) => {
 
         // Verificar si el vehículo está disponible
         const availableVehicles = await shipmentAssignmentModel.availableVehicles(vehicle_id);
-        let current_weight = availableVehicles[0].current_weight + oneShipment[0].weight;;
+        let current_weight = parseFloat(availableVehicles[0].current_weight) + parseFloat(oneShipment[0].weight);
         let max_weight = availableVehicles[0].max_weight;
         if (availableVehicles.length > 0) {
             if (current_weight > max_weight) {
