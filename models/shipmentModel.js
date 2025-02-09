@@ -125,7 +125,7 @@ const filterShipments = async (filters) => {
         query += ' AND carriers.id = ?';
         queryParams.push(carrier_id);
     }
-    console.log(query);
+    //console.log(query);
     const [rows] = await connection.execute(query, queryParams);
     await connection.end();
     return rows;

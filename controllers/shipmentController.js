@@ -110,6 +110,13 @@ const filterShipments = async (req, res) => {
         // Obtener los filtros de la URL
         const filters = req.body;
 
+        // Validar fechas
+        if (filters.start_date && filters.end_date) {
+            if (filters.start_date > filters.end_date) {
+                return res.status(400).json({ error: "La fecha de inicio no puede ser mayor a la fecha final" });
+            }
+        }
+
         // Filtrar envíos
         const shipments = await ShipmentModel.filterShipments(filters);
 
