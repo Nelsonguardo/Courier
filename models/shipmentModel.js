@@ -97,45 +97,62 @@ const filterShipments = async (filters) => {
     const { id, status, carrier_id, start_date, end_date } = filters;
 
     let query = `
-        SELECT 
-            shipments.id, 
-            shipments.origin_city, 
-            shipments.destination_city, 
-            shipments.weight, 
-            shipments.status, 
-            carriers.name AS carrier_name,
-            TIMESTAMPDIFF(DAY, shipments.created_at, shipments.updated_at) AS total_days,
-            TIMESTAMPDIFF(HOUR, shipments.created_at, shipments.updated_at) % 24 AS total_hours,
-            TIMESTAMPDIFF(MINUTE, shipments.created_at, shipments.updated_at) % 60 AS total_minutes
-        FROM shipments
-        LEFT JOIN shipment_assignments 
-            ON shipment_assignments.shipment_id = shipments.id
-        LEFT JOIN carriers 
-            ON carriers.id = shipment_assignments.carrier_id 
-        WHERE 1=1
-    `;
+            SELECT 
+                s.id, 
+                s.origin_city, 
+                s.destination_city, 
+                s.weight, 
+                s.status, 
+                c.name AS carrier_name,
+                ssh.latest_status,
+                ssh.latest_changed_at,
+                TIMESTAMPDIFF(DAY, s.created_at, s.updated_at) AS total_days,
+                TIMESTAMPDIFF(HOUR, s.created_at, s.updated_at) % 24 AS total_hours,
+                TIMESTAMPDIFF(MINUTE, s.created_at, s.updated_at) % 60 AS total_minutes
+            FROM shipments s
+            LEFT JOIN shipment_assignments sa 
+                ON sa.shipment_id = s.id
+            LEFT JOIN carriers c 
+                ON c.id = sa.carrier_id 
+            LEFT JOIN (
+                SELECT shipment_id, 
+                    status AS latest_status, 
+                    changed_at AS latest_changed_at
+                FROM shipment_status_history 
+                WHERE (shipment_id, changed_at) IN (
+                    SELECT shipment_id, MAX(changed_at) 
+                    FROM shipment_status_history 
+                    GROUP BY shipment_id
+                )
+            ) ssh ON ssh.shipment_id = s.id
+            WHERE 1=1
+         `;
 
     const queryParams = [];
 
     if (id) {
-        query += ' AND shipments.id = ?';
+        query += ' AND s.id = ?';
         queryParams.push(id);
     }
 
     if (status) {
-        query += ' AND shipments.status = ?';
+        query += ' AND s.status = ?';
         queryParams.push(status);
     }
 
     if (start_date && end_date) {
-        query += ' AND DATE(shipments.created_at) BETWEEN ? AND ?';
+        query += ' AND DATE(s.created_at) BETWEEN ? AND ?';
         queryParams.push(start_date, end_date);
     }
 
     if (carrier_id) {
-        query += ' AND carriers.id = ?';
+        query += ' AND c.id = ?';
         queryParams.push(carrier_id);
     }
+
+    // Agregar ORDER BY, LIMIT y OFFSET
+    query += ' ORDER BY s.created_at DESC LIMIT 10 OFFSET 0';
+
     //console.log(query);
     const [rows] = await connection.execute(query, queryParams);
     await connection.end();
