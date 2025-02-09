@@ -13,7 +13,7 @@ DB_NAME_DEV=courierdev
 DB_NAME_TEST=couriertest
 DB_NAME_PROD=courier
 DB_PORT=3306
-PORT=3000
+PORT=$2
 ENVIROMENT=$1
 EOL
 
