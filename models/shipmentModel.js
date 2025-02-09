@@ -97,10 +97,21 @@ const filterShipments = async (filters) => {
     const { id, status, carrier_id, start_date, end_date } = filters;
 
     let query = `
-        SELECT shipments.id, shipments.origin_city, shipments.destination_city, shipments.weight, shipments.status, carriers.name
+        SELECT 
+            shipments.id, 
+            shipments.origin_city, 
+            shipments.destination_city, 
+            shipments.weight, 
+            shipments.status, 
+            carriers.name AS carrier_name,
+            TIMESTAMPDIFF(DAY, shipments.created_at, shipments.updated_at) AS total_days,
+            TIMESTAMPDIFF(HOUR, shipments.created_at, shipments.updated_at) % 24 AS total_hours,
+            TIMESTAMPDIFF(MINUTE, shipments.created_at, shipments.updated_at) % 60 AS total_minutes
         FROM shipments
-        LEFT JOIN shipment_assignments ON shipment_assignments.shipment_id = shipments.id
-        LEFT JOIN carriers ON carriers.id = shipment_assignments.carrier_id
+        LEFT JOIN shipment_assignments 
+            ON shipment_assignments.shipment_id = shipments.id
+        LEFT JOIN carriers 
+            ON carriers.id = shipment_assignments.carrier_id 
         WHERE 1=1
     `;
 
