@@ -90,10 +90,52 @@ const getAllTrackShipmentStatusById = async (shipment_id) => {
     return rows;
 };
 
+// Filtrar envíos
+const filterShipments = async (filters) => {
+
+    const connection = await createConnection();
+    const { id, status, carrier_id, start_date, end_date } = filters;
+
+    let query = `
+        SELECT shipments.id, shipments.origin_city, shipments.destination_city, shipments.weight, shipments.status, carriers.name
+        FROM shipments
+        LEFT JOIN shipment_assignments ON shipment_assignments.shipment_id = shipments.id
+        LEFT JOIN carriers ON carriers.id = shipment_assignments.carrier_id
+        WHERE 1=1
+    `;
+
+    const queryParams = [];
+
+    if (id) {
+        query += ' AND shipments.id = ?';
+        queryParams.push(id);
+    }
+
+    if (status) {
+        query += ' AND shipments.status = ?';
+        queryParams.push(status);
+    }
+
+    if (start_date && end_date) {
+        query += ' AND DATE(shipments.created_at) BETWEEN ? AND ?';
+        queryParams.push(start_date, end_date);
+    }
+
+    if (carrier_id) {
+        query += ' AND carriers.id = ?';
+        queryParams.push(carrier_id);
+    }
+    console.log(query);
+    const [rows] = await connection.execute(query, queryParams);
+    await connection.end();
+    return rows;
+};
+
 module.exports = {
     createShipment,
     createShipmentStatus,
     updateShipmentStatus,
     getOneTrackShipmentStatusById,
-    getAllTrackShipmentStatusById
+    getAllTrackShipmentStatusById,
+    filterShipments
 };

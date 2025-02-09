@@ -16,7 +16,7 @@ const createToken = (user) => {
         email: user.EMAIL,
         fechacrea: user.FECHACREA,
         iat: moment().unix(),
-        exp: moment().add(1, 'days').unix()
+        exp: moment().add(7, 'days').unix()
     };
     //Devolver el token
     return jwt.encode(payload, secret);

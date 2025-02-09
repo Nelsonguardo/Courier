@@ -104,10 +104,33 @@ const getAllTrackShipmentStatusById = async (req, res) => {
     }
 };
 
+// Controlador para filtrar envíos
+const filterShipments = async (req, res) => {
+    try {
+        // Obtener los filtros de la URL
+        const filters = req.body;
+
+        // Filtrar envíos
+        const shipments = await ShipmentModel.filterShipments(filters);
+
+        if (shipments.length === 0) {
+            return res.status(404).json({ error: "Envíos no encontrados" });
+        } else {
+            return res.status(200).json({
+                status: "success",
+                shipments
+            });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 
 module.exports = {
     createShipment,
     updateShipmentStatus,
     getOneTrackShipmentStatusById,
-    getAllTrackShipmentStatusById
+    getAllTrackShipmentStatusById,
+    filterShipments
 };
