@@ -1,9 +1,10 @@
-const bcrypt = require('bcrypt');
-const jwt = require('../services/jwt');
-const UserModel = require('../models/userModel');
+import bcrypt from 'bcrypt';
+import { createToken } from '../services/jwt.js';
+import * as UserModel from '../models/userModel.js';
+import * as Validate from '../helpers/validate.js';
 
 // Verificar si un usuario ya existe por su email
-const UserList = async (req, res) => {
+export const UserList = async (req, res) => {
     try {
         const users = await UserModel.getAllUsers();
         res.status(200).json(users);
@@ -14,13 +15,15 @@ const UserList = async (req, res) => {
 };
 
 // Controlador para crear un nuevo usuario
-const UserCreate = async (req, res) => {
+export const UserCreate = async (req, res) => {
     try {
         const { name, last_name, email, password } = req.body;
 
-        // Validar datos
-        if (!name || !last_name || !email || !password) {
-            return res.status(400).json({ error: "Faltan datos por enviar" });
+        try {
+            Validate.validate(req.body);
+        } catch (error) {
+            console.log(error);
+            return res.status(400).json({ error: error.message });
         }
 
         // Verificar si el usuario ya existe
@@ -42,7 +45,7 @@ const UserCreate = async (req, res) => {
 };
 
 // Controlador para el login de usuarios
-const login = async (req, res) => {
+export const login = async (req, res) => {
     try {
         let { email, password } = req.body;
 
@@ -75,7 +78,7 @@ const login = async (req, res) => {
         }
 
         // Generar el token
-        const token = jwt.createToken(user);
+        const token = createToken(user);
 
         return res.status(200).send({
             status: "success",
@@ -88,10 +91,4 @@ const login = async (req, res) => {
         console.error("Error en login:", error);
         res.status(500).json({ error: "Error en el login" });
     }
-};
-
-module.exports = {
-    UserList,
-    UserCreate,
-    login
 };

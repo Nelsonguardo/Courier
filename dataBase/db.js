@@ -1,5 +1,5 @@
-const mysql = require('mysql2/promise');
-const { dbConfig } = require("../config/config");
+import mysql from 'mysql2/promise';
+import { dbConfig } from '../config/config.js';
 
 async function createConnection() {
   try {
@@ -12,4 +12,4 @@ async function createConnection() {
   }
 }
 
-module.exports = createConnection;
+export default createConnection;
