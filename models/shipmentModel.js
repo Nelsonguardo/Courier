@@ -1,4 +1,5 @@
 import createConnection from '../dataBase/db.js';
+import { redisClient } from '../config/redis.js';
 
 // Crear un nuevo envío
 const createShipment = async (shipmentData) => {
@@ -102,10 +103,21 @@ const getAllTrackShipmentStatusById = async (shipment_id) => {
 
 // Filtrar envíos
 const filterShipments = async (filters) => {
-    const connection = await createConnection();
-    const { id, status, carrier_id, start_date, end_date } = filters;
+    try {
+        // Crear una clave única basada en los filtros
+        const cacheKey = `shipments:${JSON.stringify(filters)}`;
 
-    let query = `
+        // Intentar obtener datos de Redis
+        const cachedData = await redisClient.get(cacheKey);
+        if (cachedData) {
+            console.log('Cache hit - Devolución de datos desde Redis');
+            return JSON.parse(cachedData);
+        }
+
+        const connection = await createConnection();
+        const { id, status, carrier_id, start_date, end_date } = filters;
+
+        let query = `
         SELECT 
             s.id, 
             s.origin_city, 
@@ -137,35 +149,47 @@ const filterShipments = async (filters) => {
         WHERE 1=1
     `;
 
-    const queryParams = [];
+        const queryParams = [];
 
-    if (id) {
-        query += ' AND s.id = ?';
-        queryParams.push(id);
+        if (id) {
+            query += ' AND s.id = ?';
+            queryParams.push(id);
+        }
+
+        if (status) {
+            let newostatus = status.toLowerCase();
+            query += ' AND s.status = ?';
+            queryParams.push(newostatus);
+        }
+
+        if (start_date && end_date) {
+            query += ' AND DATE(s.created_at) BETWEEN ? AND ?';
+            queryParams.push(start_date, end_date);
+        }
+
+        if (carrier_id) {
+            query += ' AND c.id = ?';
+            queryParams.push(carrier_id);
+        }
+
+        // Agregar ORDER BY, LIMIT y OFFSET
+        query += ' ORDER BY s.created_at DESC LIMIT 10 OFFSET 0';
+
+
+        const [rows] = await connection.execute(query, queryParams);
+        await connection.end();
+
+        // Guardar en Redis con expiración de 5 minutos
+        await redisClient.set(cacheKey, JSON.stringify(rows), {
+            EX: 300 // 5 minutos en segundos
+        });
+        console.log('Cache miss - Datos almacenados en Redis');
+
+        return rows;
+    } catch (error) {
+        console.error('Error in filterShipments:', error);
+        throw error;
     }
-
-    if (status) {
-        let newostatus = status.toLowerCase();
-        query += ' AND s.status = ?';
-        queryParams.push(newostatus);
-    }
-
-    if (start_date && end_date) {
-        query += ' AND DATE(s.created_at) BETWEEN ? AND ?';
-        queryParams.push(start_date, end_date);
-    }
-
-    if (carrier_id) {
-        query += ' AND c.id = ?';
-        queryParams.push(carrier_id);
-    }
-
-    // Agregar ORDER BY, LIMIT y OFFSET
-    query += ' ORDER BY s.created_at DESC LIMIT 10 OFFSET 0';
-
-    const [rows] = await connection.execute(query, queryParams);
-    await connection.end();
-    return rows;
 };
 
 export {
