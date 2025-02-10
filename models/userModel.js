@@ -1,4 +1,4 @@
-const createConnection = require('../dataBase/db');
+import createConnection from '../dataBase/db.js';
 
 // Obtener un usuario por su email
 const getUserByEmail = async (email) => {
@@ -38,7 +38,7 @@ const userExists = async (email) => {
     return existingUser.length > 0;
 };
 
-module.exports = {
+export {
     getUserByEmail,
     getAllUsers,
     createUser,

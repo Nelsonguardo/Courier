@@ -1,8 +1,8 @@
-const express = require('express');
-const router = express.Router();
-const check = require('../middlewares/auth');
+import express from 'express';
+import { auth as checkAuth } from '../middlewares/auth.js';
+import { UserList, UserCreate, login } from '../controllers/userController.js';
 
-const { UserList, UserCreate, login } = require('../controllers/userController');
+const router = express.Router();
 
 /**
  * @swagger
@@ -142,8 +142,8 @@ const { UserList, UserCreate, login } = require('../controllers/userController')
  *         description: Error en el login
  */
 
-router.get('/', check.auth, UserList);
+router.get('/', checkAuth, UserList);
 router.post('/', UserCreate);
 router.post('/login', login);
 
-module.exports = router;
+export default router;

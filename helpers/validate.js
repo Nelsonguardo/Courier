@@ -1,4 +1,4 @@
-const validator = require('validator');
+import validator from 'validator';
 
 const validate = (params) => {
     let errors = [];
@@ -24,7 +24,4 @@ const validate = (params) => {
     }
 }
 
-
-module.exports = {
-    validate
-};
+export { validate };

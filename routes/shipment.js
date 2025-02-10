@@ -1,14 +1,14 @@
-const express = require('express');
-const router = express.Router();
-const check = require('../middlewares/auth');
-
-const {
+import express from 'express';
+import { auth as checkAuth } from '../middlewares/auth.js';
+import {
     createShipment,
     updateShipmentStatus,
     getAllTrackShipmentStatusById,
     getOneTrackShipmentStatusById,
     filterShipments
-} = require('../controllers/shipmentController');
+} from '../controllers/shipmentController.js';
+
+const router = express.Router();
 
 /**
  * @swagger
@@ -61,7 +61,7 @@ const {
  *                 example: "cartagena"
  *               destination_city:
  *                 type: string
- *                 example: "baranquilla"
+ *                 example: "barranquilla"
  *               weight:
  *                 type: number
  *                 example: 10.5
@@ -223,11 +223,10 @@ const {
  *         description: Error filtrando los envíos
  */
 
-router.post('/', check.auth, createShipment);
-router.put('/', check.auth, updateShipmentStatus);
-router.get('/all', check.auth, getAllTrackShipmentStatusById);
-router.get('/one', check.auth, getOneTrackShipmentStatusById);
-router.get('/filter', check.auth, filterShipments);
+router.post('/', checkAuth, createShipment);
+router.put('/', checkAuth, updateShipmentStatus);
+router.get('/all', checkAuth, getAllTrackShipmentStatusById);
+router.get('/one', checkAuth, getOneTrackShipmentStatusById);
+router.get('/filter', checkAuth, filterShipments);
 
-
-module.exports = router;
+export default router;

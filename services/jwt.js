@@ -1,11 +1,11 @@
-//Importar dependencias
-const jwt = require('jwt-simple');
-const moment = require('moment');
+// Importar dependencias
+import jwt from 'jwt-simple';
+import moment from 'moment';
 
-//Clave secreta
+// Clave secreta
 const secret = 'CLAVE_SECRETA_DE_PRACTICA_DE_API_REST_NELSON_231199';
 
-//Crear una función para generar el token
+// Crear una función para generar el token
 const createToken = (user) => {
     const payload = {
         id: user.ID,
@@ -18,11 +18,8 @@ const createToken = (user) => {
         iat: moment().unix(),
         exp: moment().add(7, 'days').unix()
     };
-    //Devolver el token
+    // Devolver el token
     return jwt.encode(payload, secret);
 }
 
-module.exports = {
-    createToken,
-    secret
-}
+export { createToken, secret };

@@ -1,7 +1,8 @@
-const express = require('express');
+import express from 'express';
+import { auth as checkAuth } from '../middlewares/auth.js';
+import {createShipmentAssignment} from '../controllers/shipmentAssignmentController.js';
+
 const router = express.Router();
-const check = require('../middlewares/auth');
-const shipmentAssignmentController = require('../controllers/shipmentAssignmentController');
 
 /**
  * @swagger
@@ -52,6 +53,6 @@ const shipmentAssignmentController = require('../controllers/shipmentAssignmentC
  *         description: Error al crear la asignación de envío
  */
 
-router.post('/', check.auth, shipmentAssignmentController.createShipmentAssignment);
+router.post('/', checkAuth, createShipmentAssignment);
 
-module.exports = router;
+export default router;
