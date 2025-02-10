@@ -1,7 +1,8 @@
-const ShipmentModel = require('../models/shipmentModel');
+import * as ShipmentModel from '../models/shipmentModel.js';
+import * as shipmentAssignmentModel from '../models/shipmentAssignmentModel.js';
 
 // Controlador para crear un nuevo envío
-const createShipment = async (req, res) => {
+export const createShipment = async (req, res) => {
     try {
         const shipmentData = req.body;
 
@@ -18,10 +19,19 @@ const createShipment = async (req, res) => {
             }
         }
 
+        let origin_city = shipmentData.origin_city.toLowerCase();
+        let destination_city = shipmentData.destination_city.toLowerCase();
+
+        // Validar ruta de envío
+        const oneRoute = await shipmentAssignmentModel.findRoute(origin_city, destination_city);
+        if (oneRoute.length === 0) {
+            return res.status(404).json({ error: 'Ruta no encontrada' });
+        }
+
         // Crear el envío
         const result = await ShipmentModel.createShipment(shipmentData);
 
-        //Insertar el nuevo estado en el historial con observación
+        // Insertar el nuevo estado en el historial con observación
         await ShipmentModel.createShipmentStatus(result.insertId);
 
         res.status(201).json({
@@ -35,17 +45,20 @@ const createShipment = async (req, res) => {
 };
 
 // Controlador para actualizar el estado del envío
-const updateShipmentStatus = async (req, res) => {
+export const updateShipmentStatus = async (req, res) => {
     try {
         const { shipment_id, new_status, observation } = req.body;
 
         // Validar datos
-        if (!shipment_id || !new_status) {
+        if (!shipment_id || !new_status || !observation) {
             return res.status(400).json({ error: "Faltan datos por enviar" });
         }
 
         // Actualizar el estado del envío y registrar en el historial
-        const result = await ShipmentModel.updateShipmentStatus(shipment_id, new_status, observation);
+        let newstatus = new_status.toLowerCase();
+        let newobservation = observation.toLowerCase();
+
+        const result = await ShipmentModel.updateShipmentStatus(shipment_id, newstatus, newobservation);
 
         if (!result) {
             return res.status(404).json({ error: "Envío no encontrado" });
@@ -58,9 +71,10 @@ const updateShipmentStatus = async (req, res) => {
     }
 };
 
-const getOneTrackShipmentStatusById = async (req, res) => {
+// Controlador para obtener el estado actual de un envío
+export const getOneTrackShipmentStatusById = async (req, res) => {
     try {
-        const { shipment_id } = req.body;
+        const { shipment_id } = req.query;
 
         // Validar datos
         if (!shipment_id) {
@@ -81,9 +95,10 @@ const getOneTrackShipmentStatusById = async (req, res) => {
     }
 };
 
-const getAllTrackShipmentStatusById = async (req, res) => {
+// Controlador para obtener el historial de estados del envío por ID
+export const getAllTrackShipmentStatusById = async (req, res) => {
     try {
-        const { shipment_id } = req.body;
+        const { shipment_id } = req.query;
 
         // Validar datos
         if (!shipment_id) {
@@ -105,10 +120,10 @@ const getAllTrackShipmentStatusById = async (req, res) => {
 };
 
 // Controlador para filtrar envíos
-const filterShipments = async (req, res) => {
+export const filterShipments = async (req, res) => {
     try {
         // Obtener los filtros de la URL
-        const filters = req.body;
+        const filters = req.query;
 
         // Validar fechas
         if (filters.start_date && filters.end_date) {
@@ -131,13 +146,4 @@ const filterShipments = async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
-};
-
-
-module.exports = {
-    createShipment,
-    updateShipmentStatus,
-    getOneTrackShipmentStatusById,
-    getAllTrackShipmentStatusById,
-    filterShipments
 };

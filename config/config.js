@@ -1,9 +1,10 @@
-require("dotenv").config();
+import dotenv from 'dotenv';
+dotenv.config();
 
-let environment = process.env.ENVIROMENT || "development";
+const environment = process.env.ENVIROMENT || "development";
 let db_name;
 
-switch (environment){
+switch (environment) {
   case "development":
     db_name = process.env.DB_NAME_DEV;
     break;
@@ -17,13 +18,12 @@ switch (environment){
     db_name = process.env.DB_NAME_DEV;
 }
 
-module.exports = {
-  dbConfig: {
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: db_name,
-    port: process.env.DB_PORT,
-  },
-  port: process.env.PORT || 3000,
+export const dbConfig = {
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: db_name,
+  port: process.env.DB_PORT,
 };
+
+export const port = process.env.PORT || 3000;
