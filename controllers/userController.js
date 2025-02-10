@@ -1,6 +1,8 @@
 const bcrypt = require('bcrypt');
 const jwt = require('../services/jwt');
 const UserModel = require('../models/userModel');
+const Validadate = require('../helpers/validate');
+
 
 // Verificar si un usuario ya existe por su email
 const UserList = async (req, res) => {
@@ -18,10 +20,16 @@ const UserCreate = async (req, res) => {
     try {
         const { name, last_name, email, password } = req.body;
 
-        // Validar datos
-        if (!name || !last_name || !email || !password) {
-            return res.status(400).json({ error: "Faltan datos por enviar" });
+        try {
+            Validadate.validate(req.body);
+        } catch (error) {
+            console.log(error);
+            return res.status(400).json({ error: error.message });
         }
+        // // Validar datos
+        // if (!name || !last_name || !email || !password) {
+        //     return res.status(400).json({ error: "Faltan datos por enviar" });
+        // }
 
         // Verificar si el usuario ya existe
         if (await UserModel.userExists(email)) {
