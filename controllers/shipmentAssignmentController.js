@@ -30,7 +30,7 @@ const createShipmentAssignment =  async (req, res) => {
         }
 
         // Verificar si el transportista y el vehículo existen
-        const validateCarrierAndVehicle = await shipmentAssignmentModel.validateCarrierAndVehicle(carrier_id , vehicle_id);
+        const validateCarrierAndVehicle = await shipmentAssignmentModel.validateCarrierAndVehicle(carrier_id , vehicle_id, oneRoute[0].id);
         if (validateCarrierAndVehicle.length === 0) {
             return res.status(404).json({ error: 'Transportista y vehículo no vinculados a la ruta' });
         }

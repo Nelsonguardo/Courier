@@ -72,16 +72,16 @@ const availableVehicles = async (vehicle_id) => {
     return result;
 };
 
-const validateCarrierAndVehicle = async (carrier_id, vehicle_id) => {
+const validateCarrierAndVehicle = async (carrier_id, vehicle_id, route_id) => {
     const connection = await createConnection();
     const [result] = await connection.execute(
         `
           SELECT * FROM carriers 
             INNER JOIN vehicles ON vehicles.carrier_id = carriers.id
             INNER JOIN routes ON routes.id = carriers.route_id
-            WHERE carriers.id = ? AND vehicles.id = ?;
+            WHERE carriers.id = ? AND vehicles.id = ? AND routes.id = ?;
          `,
-        [carrier_id, vehicle_id]
+        [carrier_id, vehicle_id , route_id]
     );
     await connection.end();
     return result;
