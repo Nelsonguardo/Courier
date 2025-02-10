@@ -1,4 +1,5 @@
 const ShipmentModel = require('../models/shipmentModel');
+const shipmentAssignmentModel = require('../models/shipmentAssignmentModel.js');
 
 // Controlador para crear un nuevo envío
 const createShipment = async (req, res) => {
@@ -16,6 +17,12 @@ const createShipment = async (req, res) => {
             if (!shipmentData[field]) {
                 return res.status(400).json({ error: `Falta el campo ${field}` });
             }
+        }
+
+        //validar ruta de envio
+        const oneRoute = await shipmentAssignmentModel.findRoute(shipmentData.origin_city, shipmentData.destination_city);
+        if (oneRoute.length === 0) {
+            return res.status(404).json({ error: 'Ruta no encontrada' });
         }
 
         // Crear el envío
