@@ -1,3 +1,4 @@
+const {port} = require('./config');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
@@ -11,7 +12,7 @@ const options = {
         },
         servers: [
             {
-                url: 'http://localhost:3000/api',
+                url: `http://localhost:${port}/api`,
             },
         ],
         components: {

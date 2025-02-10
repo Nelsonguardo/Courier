@@ -19,8 +19,11 @@ const createShipment = async (req, res) => {
             }
         }
 
+        let origin_city = shipmentData.origin_city.toLowerCase();
+        let destination_city = shipmentData.destination_city.toLowerCase();
+
         //validar ruta de envio
-        const oneRoute = await shipmentAssignmentModel.findRoute(shipmentData.origin_city, shipmentData.destination_city);
+        const oneRoute = await shipmentAssignmentModel.findRoute(origin_city, destination_city);
         if (oneRoute.length === 0) {
             return res.status(404).json({ error: 'Ruta no encontrada' });
         }
@@ -47,12 +50,15 @@ const updateShipmentStatus = async (req, res) => {
         const { shipment_id, new_status, observation } = req.body;
 
         // Validar datos
-        if (!shipment_id || !new_status) {
+        if (!shipment_id || !new_status || !observation) {
             return res.status(400).json({ error: "Faltan datos por enviar" });
         }
 
         // Actualizar el estado del envío y registrar en el historial
-        const result = await ShipmentModel.updateShipmentStatus(shipment_id, new_status, observation);
+        let newstatus = new_status.toLowerCase();
+        let newobservation = observation.toLowerCase();
+
+        const result = await ShipmentModel.updateShipmentStatus(shipment_id, newstatus, newobservation);
 
         if (!result) {
             return res.status(404).json({ error: "Envío no encontrado" });

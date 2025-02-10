@@ -58,10 +58,10 @@ const {
  *                 example: "0987654321"
  *               origin_city:
  *                 type: string
- *                 example: "CiudadOrigen"
+ *                 example: "cartagena"
  *               destination_city:
  *                 type: string
- *                 example: "CiudadDestino"
+ *                 example: "baranquilla"
  *               weight:
  *                 type: number
  *                 example: 10.5
@@ -189,15 +189,17 @@ const {
  *         schema:
  *           type: string
  *           format: date
+ *           example: "2025-02-08"
  *         required: false
- *         description: Fecha de inicio
+ *         description: "Fecha de inicio (Formato: YYYY-MM-DD)"
  *       - in: query
  *         name: end_date
  *         schema:
  *           type: string
  *           format: date
+ *           example: "2025-02-08"
  *         required: false
- *         description: Fecha de fin
+ *         description: "Fecha de fin (Formato: YYYY-MM-DD)"
  *       - in: query
  *         name: status
  *         schema:

@@ -18,10 +18,20 @@ const createShipment = async (shipmentData) => {
         product_type
     } = shipmentData;
 
+    //aplicando twlowerCase
+    let sendername = sender_name.toLowerCase();
+    let senderaddress = sender_address.toLowerCase();
+    let senderemail = sender_email.toLowerCase();
+    let receivername = receiver_name.toLowerCase();
+    let receiveraddress = receiver_address.toLowerCase();
+    let receiveremail = receiver_email.toLowerCase();
+    let origincity = origin_city.toLowerCase();
+    let destinationcity = destination_city.toLowerCase();
+
     const connection = await createConnection();
     const [result] = await connection.execute(
         "INSERT INTO shipments (sender_name, sender_address, sender_email, sender_phone ,receiver_name, receiver_address, receiver_email, receiver_phone, origin_city, destination_city, weight, dimensions, product_type, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'en espera')",
-        [sender_name, sender_address, sender_email, sender_phone, receiver_name, receiver_address, receiver_email, receiver_phone, origin_city, destination_city, weight, dimensions, product_type]
+        [sendername, senderaddress, senderemail, sender_phone, receivername, receiveraddress, receiveremail, receiver_phone, origincity, destinationcity, weight, dimensions, product_type]
     );
 
     await connection.end();
@@ -136,8 +146,9 @@ const filterShipments = async (filters) => {
     }
 
     if (status) {
+        let newostatus = status.toLowerCase();
         query += ' AND s.status = ?';
-        queryParams.push(status);
+        queryParams.push(newostatus);
     }
 
     if (start_date && end_date) {
