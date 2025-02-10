@@ -54,9 +54,6 @@ web_modules/
 # Optional eslint cache
 .eslintcache
 
-# Test directory
-test/
-
 # Optional stylelint cache
 .stylelintcache
 
