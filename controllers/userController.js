@@ -7,7 +7,13 @@ import * as Validate from '../helpers/validate.js';
 export const UserList = async (req, res) => {
     try {
         const users = await UserModel.getAllUsers();
-        res.status(200).json(users);
+        // Remove password field from each user
+        const usersWithoutPassword = users.map(user => {
+            const { password, ...userWithoutPassword } = user;
+            return userWithoutPassword;
+        });
+
+        res.status(200).json(usersWithoutPassword);
     } catch (error) {
         console.error("Error en UserList:", error);
         res.status(500).json({ error: "Error obteniendo usuarios" });
@@ -80,10 +86,13 @@ export const login = async (req, res) => {
         // Generar el token
         const token = createToken(user);
 
+        // Desestructurar el objeto user excluyendo password
+        const { password: _, ...userWithoutPassword } = user;
+
         return res.status(200).send({
             status: "success",
             message: "Te has logueado correctamente",
-            user,
+            user: userWithoutPassword,
             token
         });
 
