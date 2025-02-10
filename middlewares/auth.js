@@ -9,6 +9,7 @@ const secret = libjwt.secret;
 //funcion de autenticacion
 exports.auth = (req, res, next) => {
     //comprobar si me llega la cabezera de autenticacion
+    //console.log(req.headers.authorization);
     if (!req.headers.authorization) {
         return res.status(403).send({
             status: 'error',
@@ -17,6 +18,9 @@ exports.auth = (req, res, next) => {
     }
     //limpiar el token
     let token = req.headers.authorization.replace(/['"]+/g, '');
+    if (token.startsWith('Bearer ')) {
+        token = token.slice(7, token.length).trimLeft();
+    }
     //decodificar el token
     try {
         let payload = jwt.decode(token, secret);

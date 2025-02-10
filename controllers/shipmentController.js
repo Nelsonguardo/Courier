@@ -67,7 +67,7 @@ const updateShipmentStatus = async (req, res) => {
 
 const getOneTrackShipmentStatusById = async (req, res) => {
     try {
-        const { shipment_id } = req.body;
+        const { shipment_id } = req.query;
 
         // Validar datos
         if (!shipment_id) {
@@ -90,7 +90,8 @@ const getOneTrackShipmentStatusById = async (req, res) => {
 
 const getAllTrackShipmentStatusById = async (req, res) => {
     try {
-        const { shipment_id } = req.body;
+        const { shipment_id } = req.query;
+        //console.log(req.query.shipment_id);
 
         // Validar datos
         if (!shipment_id) {
@@ -115,7 +116,7 @@ const getAllTrackShipmentStatusById = async (req, res) => {
 const filterShipments = async (req, res) => {
     try {
         // Obtener los filtros de la URL
-        const filters = req.body;
+        const filters = req.query;
 
         // Validar fechas
         if (filters.start_date && filters.end_date) {
