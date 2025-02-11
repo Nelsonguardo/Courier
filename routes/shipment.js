@@ -99,13 +99,13 @@ const router = express.Router();
  *             properties:
  *               shipment_id:
  *                 type: integer
- *                 example: 1
+ *                 example: 100000
  *               new_status:
  *                 type: string
- *                 example: "En tránsito"
+ *                 example: "En bodega"
  *               observation:
  *                 type: string
- *                 example: "El paquete ha salido del almacén"
+ *                 example: "El paquete en bodega ciudad destino"
  *     responses:
  *       200:
  *         description: Estado del envío actualizado correctamente
@@ -211,7 +211,7 @@ const router = express.Router();
  *         schema:
  *           type: integer
  *         required: false
- *         description: ID del envío
+ *         description: ID del transportista
  *     responses:
  *       200:
  *         description: Envíos filtrados correctamente

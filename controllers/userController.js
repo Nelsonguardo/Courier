@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { createToken } from '../services/jwt.js';
 import * as UserModel from '../models/userModel.js';
 import * as Validate from '../helpers/validate.js';
