@@ -43,12 +43,16 @@ export const createShipmentAssignment = async (req, res) => {
 
         // Verificar si el vehículo está disponible
         const availableVehicles = await shipmentAssignmentModel.availableVehicles(vehicle_id);
-        let current_weight = parseFloat(availableVehicles[0].current_weight) + parseFloat(oneShipment[0].weight);
-        let max_weight = availableVehicles[0].max_weight;
-        if (availableVehicles.length > 0) {
-            if (current_weight > max_weight) {
-                return res.status(404).json({ error: 'Vehículo no cuenta con suficiente capacidad' });
-            }
+        let current_weight = 0;
+        let max_weight = 0;
+
+        if (availableVehicles && availableVehicles.length > 0 && availableVehicles[0]) {
+            current_weight = parseFloat(availableVehicles[0].current_weight || 0) + parseFloat(oneShipment[0].weight);
+            max_weight = parseFloat(availableVehicles[0].max_weight || 0);
+        }
+
+        if (current_weight > max_weight) {
+            return res.status(404).json({ error: 'Vehículo no cuenta con suficiente capacidad' });
         }
 
         // Crear la asignación de envío

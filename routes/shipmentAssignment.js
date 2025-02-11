@@ -28,13 +28,13 @@ const router = express.Router();
  *             properties:
  *               shipment_id:
  *                 type: integer
- *                 example: 1
+ *                 example: 100000
  *               carrier_id:
  *                 type: integer
  *                 example: 2
  *               vehicle_id:
  *                 type: integer
- *                 example: 3
+ *                 example: 2
  *     responses:
  *       201:
  *         description: Asignación de envío creada exitosamente

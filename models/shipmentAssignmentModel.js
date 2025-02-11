@@ -64,7 +64,8 @@ const availableVehicles = async (vehicle_id) => {
         FROM shipment_assignments
         INNER JOIN shipments ON shipments.id = shipment_assignments.shipment_id
         INNER JOIN vehicles ON vehicles.id = shipment_assignments.vehicle_id
-        WHERE vehicles.id = ?;
+        WHERE vehicles.id = ?
+        GROUP BY vehicles.id, vehicles.capacity;
         `,
         [vehicle_id]
     );
